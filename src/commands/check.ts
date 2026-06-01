@@ -1,6 +1,7 @@
 import { buildCheckReport, EnvGuardError } from "../core/service.js";
 import { hasAnySecrets, hasHighSeveritySecrets } from "../core/secrets.js";
 import { printCheckReport, printNoRedactWarning } from "./format.js";
+import { parseOutputFormat } from "./validate.js";
 
 export interface CheckCommandOptions {
   format?: "text" | "json";
@@ -12,11 +13,10 @@ export async function runCheckCommand(
   filePath: string,
   options: CheckCommandOptions = {},
 ): Promise<number> {
-  const format = options.format ?? "text";
-  const strict = options.strict ?? false;
-  const redact = options.redact ?? true;
-
   try {
+    const format = parseOutputFormat(options.format ?? "text");
+    const strict = options.strict ?? false;
+    const redact = options.redact ?? true;
     const report = buildCheckReport(filePath);
 
     if (!redact) {

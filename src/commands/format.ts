@@ -1,7 +1,11 @@
 import chalk from "chalk";
 import Table from "cli-table3";
-import { formatKeyValue } from "../core/redact.js";
-import type { DiffJsonOutput, SecretFinding } from "../types.js";
+import {
+  formatChangedPair,
+  formatKeyValue,
+  hasDiffChanges,
+} from "../core/redact.js";
+import type { DiffJsonOutput, SecretFinding, SecretSeverity } from "../types.js";
 
 function formatSecretBadge(findings: SecretFinding[] | undefined): string {
   if (!findings || findings.length === 0) {
@@ -12,8 +16,43 @@ function formatSecretBadge(findings: SecretFinding[] | undefined): string {
   return hasError ? chalk.red(" [!secret]") : chalk.yellow(" [!warning]");
 }
 
+interface GroupedFinding {
+  key: string;
+  severity: SecretSeverity;
+  reasons: string[];
+  value: string;
+}
+
+function groupFindingsByKey(findings: SecretFinding[]): GroupedFinding[] {
+  const grouped = new Map<string, GroupedFinding>();
+
+  for (const finding of findings) {
+    const existing = grouped.get(finding.key);
+    if (!existing) {
+      grouped.set(finding.key, {
+        key: finding.key,
+        severity: finding.severity,
+        reasons: [finding.reason],
+        value: finding.value,
+      });
+      continue;
+    }
+
+    if (finding.severity === "error") {
+      existing.severity = "error";
+    }
+
+    if (!existing.reasons.includes(finding.reason)) {
+      existing.reasons.push(finding.reason);
+    }
+  }
+
+  return [...grouped.values()].sort((a, b) => a.key.localeCompare(b.key));
+}
+
 export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boolean; redact?: boolean } = {}) {
   const { showAll = false, redact = true } = options;
+  const hasDiff = hasDiffChanges(report);
 
   console.log(chalk.bold("EnvGuard Diff"));
   console.log(`A: ${report.fileA}`);
@@ -29,8 +68,8 @@ export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boo
   }
 
   const sections = [
-    { title: "ADDED", color: chalk.green, items: report.added, valueKey: "value" as const },
-    { title: "REMOVED", color: chalk.red, items: report.removed, valueKey: "value" as const },
+    { title: "ADDED", color: chalk.green, items: report.added },
+    { title: "REMOVED", color: chalk.red, items: report.removed },
   ];
 
   for (const section of sections) {
@@ -49,8 +88,7 @@ export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boo
   if (report.changed.length > 0) {
     console.log(chalk.cyan(`~ CHANGED (${report.changed.length})`));
     for (const item of report.changed) {
-      const oldLine = formatKeyValue(item.key, item.oldValue, redact);
-      const newLine = formatKeyValue(item.key, item.newValue, redact);
+      const { oldLine, newLine } = formatChangedPair(item.key, item.oldValue, item.newValue, redact);
       console.log(`  - ${oldLine}`);
       console.log(`  + ${newLine}${formatSecretBadge(item.secrets)}`);
     }
@@ -65,13 +103,17 @@ export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boo
     console.log("");
   }
 
+  if (!hasDiff) {
+    console.log(chalk.green("No differences found."));
+  }
+
   if (report.secrets.length > 0) {
     console.log(chalk.yellow(`Secrets detected: ${report.secrets.length}`));
     for (const finding of report.secrets) {
       const label = finding.severity === "error" ? chalk.red("ERROR") : chalk.yellow("WARN");
       console.log(`  ${label} ${finding.key}: ${finding.reason}`);
     }
-  } else {
+  } else if (hasDiff) {
     console.log(chalk.green("No secret patterns detected."));
   }
 }
@@ -100,15 +142,16 @@ export function printCheckReport(
     return;
   }
 
+  const grouped = groupFindingsByKey(report.secrets);
   const table = new Table({
     head: ["Severity", "Key", "Reason", "Value"],
   });
 
-  for (const finding of report.secrets) {
+  for (const finding of grouped) {
     table.push([
       finding.severity === "error" ? chalk.red("error") : chalk.yellow("warning"),
       finding.key,
-      finding.reason,
+      finding.reasons.join("; "),
       formatKeyValue(finding.key, finding.value, redact).split(" = ")[1] ?? "****",
     ]);
   }
@@ -117,5 +160,5 @@ export function printCheckReport(
 }
 
 export function printNoRedactWarning() {
-  console.error(chalk.red("Warning: --no-redact exposes sensitive values in terminal output."));
+  console.log(chalk.red("Warning: --no-redact exposes sensitive values in terminal output."));
 }

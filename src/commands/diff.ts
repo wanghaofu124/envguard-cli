@@ -1,6 +1,7 @@
 import { buildDiffReport, EnvGuardError } from "../core/service.js";
 import { hasHighSeveritySecrets } from "../core/secrets.js";
 import { printDiffReport, printNoRedactWarning } from "./format.js";
+import { parseOutputFormat } from "./validate.js";
 
 export interface DiffCommandOptions {
   format?: "text" | "json";
@@ -13,11 +14,10 @@ export async function runDiffCommand(
   fileB: string,
   options: DiffCommandOptions = {},
 ): Promise<number> {
-  const format = options.format ?? "text";
-  const showAll = options.all ?? false;
-  const redact = options.redact ?? true;
-
   try {
+    const format = parseOutputFormat(options.format ?? "text");
+    const showAll = options.all ?? false;
+    const redact = options.redact ?? true;
     const report = buildDiffReport(fileA, fileB);
 
     if (!redact) {

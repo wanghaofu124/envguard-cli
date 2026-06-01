@@ -13,6 +13,10 @@ const PATTERN_RULES: Array<{ name: string; severity: SecretSeverity; regex: RegE
   },
 ];
 
+function isLikelyPlaceholder(value: string): boolean {
+  return /placeholder|replace|changeme|your[_-]?key|example|dummy|^test[-_]|dev[-_]/i.test(value);
+}
+
 function isHighEntropy(value: string): boolean {
   if (value.length < 32) {
     return false;
@@ -65,7 +69,7 @@ export function detectSecretForEntry(
     }
   }
 
-  if (isHighEntropy(value)) {
+  if (!isLikelyPlaceholder(value) && isHighEntropy(value)) {
     pushFinding(findings, seen, {
       key,
       value,

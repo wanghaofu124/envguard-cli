@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
-import { formatKeyValue } from "../core/redact.js";
+import { formatChangedPair, formatKeyValue } from "../core/redact.js";
 import { buildDiffReport } from "../core/service.js";
 import type { DiffJsonOutput, DiffViewMode } from "../types.js";
 
@@ -62,17 +62,26 @@ function DiffSection({
         {prefix} {title} ({items.length})
       </Text>
       {title === "CHANGED"
-        ? report.changed.map((item) => (
+        ? report.changed.map((item) => {
+            const { oldLine, newLine } = formatChangedPair(
+              item.key,
+              item.oldValue,
+              item.newValue,
+              redact,
+            );
+
+            return (
             <Box key={item.key} flexDirection="column" marginLeft={2}>
               <Text>
-                - {formatKeyValue(item.key, item.oldValue, redact)}
+                - {oldLine}
                 <SecretBadge count={item.secrets?.length ?? 0} />
               </Text>
               <Text>
-                + {formatKeyValue(item.key, item.newValue, redact)}
+                + {newLine}
               </Text>
             </Box>
-          ))
+            );
+          })
         : (items as Array<{ key: string; value: string; secrets?: DiffJsonOutput["added"][number]["secrets"] }>).map(
             (item) => (
               <Text key={item.key}>
@@ -139,6 +148,8 @@ export function App({ fileA, fileB }: AppProps) {
               </Text>
             ))
           )
+        ) : countDiffItems(report) === 0 ? (
+          <Text color="green">No differences found.</Text>
         ) : (
           <>
             <DiffSection

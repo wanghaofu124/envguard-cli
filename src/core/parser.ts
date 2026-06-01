@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import type { EnvMap, ParseResult } from "../types.js";
 
 const KEY_VALUE_REGEX =
-  /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/;
+  /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(.*)$/;
 
 function stripInlineComment(value: string): string {
   let inSingle = false;

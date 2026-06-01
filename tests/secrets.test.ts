@@ -50,6 +50,16 @@ describe("detectSecretForEntry", () => {
     );
     expect(findings.some((finding) => finding.reason === "High-entropy value")).toBe(true);
   });
+
+  it("skips high-entropy warnings for placeholder values", () => {
+    const findings = detectSecretForEntry(
+      "API_KEY",
+      "sk-dev-placeholder-key-1234567890",
+      1,
+    );
+    expect(findings.some((finding) => finding.reason === "High-entropy value")).toBe(false);
+    expect(findings.some((finding) => finding.reason === "Sensitive key name")).toBe(true);
+  });
 });
 
 describe("scanEnvMap", () => {

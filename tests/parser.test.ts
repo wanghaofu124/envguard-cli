@@ -51,4 +51,9 @@ describe("parseEnvContent", () => {
     const result = parseEnvContent(content);
     expect(result.entries.get("APP_NAME")?.line).toBe(2);
   });
+
+  it("supports hyphenated keys", () => {
+    const result = parseEnvContent("MY-KEY=hyphen-value\n");
+    expect(result.entries.get("MY-KEY")?.value).toBe("hyphen-value");
+  });
 });
