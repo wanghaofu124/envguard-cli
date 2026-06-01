@@ -50,7 +50,21 @@ EnvGuard 就是为了解决这些问题而生的。它可以：
 
 ## 安装
 
-### 方式一：从 GitHub 克隆（推荐）
+### 方式一：npm / npx（推荐）
+
+无需克隆仓库，直接使用：
+
+```bash
+# 一次性运行
+npx @wanghaofu/envguard-cli diff .env.example .env
+npx @wanghaofu/envguard-cli check .env --strict
+
+# 全局安装
+npm install -g @wanghaofu/envguard-cli
+envguard --help
+```
+
+### 方式二：从 GitHub 克隆
 
 ```bash
 git clone https://github.com/wanghaofu124/envguard-cli.git
@@ -65,7 +79,7 @@ npm run build
 node bin/envguard.js --help
 ```
 
-### 方式二：全局链接（本地开发）
+### 方式三：全局链接（本地开发）
 
 ```bash
 cd envguard-cli
