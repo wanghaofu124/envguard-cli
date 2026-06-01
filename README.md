@@ -100,43 +100,62 @@ MIT
 
 # EnvGuard CLI（中文）
 
-EnvGuard 是一个安全的 `.env` 文件对比工具，默认脱敏输出，并检测常见密钥泄露模式。
+## 项目介绍
 
-## 功能
+**EnvGuard** 是一个安全的 `.env` 环境变量对比工具，帮助开发者在不泄露密钥的前提下，快速对比、审查环境配置文件。
 
-- 对比两个 `.env` 文件的差异（新增 / 删除 / 修改 / 未变更）
-- 默认脱敏显示敏感值
+你是否遇到过这些问题？
+
+- 本地 `.env` 和 `.env.example` 对不上，不知道漏了哪些变量
+- 用 `diff` 对比 env 文件时，API Key 直接暴露在终端里
+- 不确定 env 文件里是否误写了真实的 GitHub Token 或 OpenAI Key
+
+EnvGuard 通过 **差异分类 + 默认脱敏 + 密钥检测**，让 env 文件对比变得安全、清晰、可自动化。
+
+### 核心功能
+
+- 对比两个 `.env` 文件：新增 / 删除 / 修改 / 未变更
+- 默认脱敏显示，敏感 key 自动全遮罩
 - 检测 OpenAI、GitHub、AWS、JWT 等常见密钥格式
-- 支持交互式 TUI 和 JSON 输出（适合 CI）
+- 交互式 TUI 模式，也支持 JSON 输出（适合 CI）
 
-## 快速开始
+### 快速开始
 
 ```bash
 git clone https://github.com/wanghaofu124/envguard-cli.git
 cd envguard-cli
 npm install
 npm run build
+
+# 对比两个 env 文件
 node bin/envguard.js diff fixtures/.env.example fixtures/.env.dev
+
+# 扫描密钥
+node bin/envguard.js check fixtures/.env.prod
+
+# 交互模式
+node bin/envguard.js
 ```
 
-## 命令示例
+### 常用命令
 
 ```bash
-# 交互模式
-envguard
-
-# 对比
-envguard diff .env.example .env
-
-# 扫描
-envguard check .env --strict
+envguard diff .env.example .env          # 对比差异
+envguard diff .env.example .env --all    # 含未变更项
+envguard check .env --strict             # 严格扫描
+envguard                                   # 交互式 TUI
 ```
 
-## 安全说明
+### 详细教程
+
+完整中文使用教程见：[docs/TUTORIAL.zh-CN.md](docs/TUTORIAL.zh-CN.md)
+
+### 安全说明
 
 - 默认开启脱敏，`--no-redact` 会暴露明文，请谨慎使用
 - 密钥检测基于规则启发式，可能有误报或漏报
+- 请勿将真实密钥提交到 Git
 
-## 许可证
+### 许可证
 
 MIT
