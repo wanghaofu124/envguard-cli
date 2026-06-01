@@ -1,7 +1,7 @@
 # EnvGuard CLI
 
 [![CI](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/envguard-cli.svg)](https://www.npmjs.com/package/envguard-cli)
+[![npm version](https://img.shields.io/npm/v/@wanghaofu/envguard-cli.svg)](https://www.npmjs.com/package/@wanghaofu/envguard-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Secure `.env` diff tool with redaction and secret detection.
@@ -21,14 +21,14 @@ EnvGuard helps you compare environment files safely: differences are categorized
 Install and run (recommended):
 
 ```bash
-npx envguard-cli diff .env.example .env
-npx envguard-cli check .env --strict
+npx @wanghaofu/envguard-cli diff .env.example .env
+npx @wanghaofu/envguard-cli check .env --strict
 ```
 
 Or install globally:
 
 ```bash
-npm install -g envguard-cli
+npm install -g @wanghaofu/envguard-cli
 envguard diff .env.example .env
 envguard check .env
 ```
@@ -140,7 +140,7 @@ MIT
 # EnvGuard CLI（中文）
 
 [![CI](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/envguard-cli.svg)](https://www.npmjs.com/package/envguard-cli)
+[![npm version](https://img.shields.io/npm/v/@wanghaofu/envguard-cli.svg)](https://www.npmjs.com/package/@wanghaofu/envguard-cli)
 
 ## 项目介绍
 
@@ -165,11 +165,11 @@ EnvGuard 通过 **差异分类 + 默认脱敏 + 密钥检测**，让 env 文件�
 
 ```bash
 # 推荐：无需安装
-npx envguard-cli diff .env.example .env
-npx envguard-cli check .env --strict
+npx @wanghaofu/envguard-cli diff .env.example .env
+npx @wanghaofu/envguard-cli check .env --strict
 
 # 全局安装
-npm install -g envguard-cli
+npm install -g @wanghaofu/envguard-cli
 envguard diff .env.example .env
 ```
 

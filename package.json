@@ -1,5 +1,5 @@
 {
-  "name": "envguard-cli",
+  "name": "@wanghaofu/envguard-cli",
   "version": "0.1.0",
   "description": "Secure .env file diff tool with redaction and secret detection",
   "type": "module",
@@ -29,7 +29,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wanghaofu124/envguard-cli.git"
+    "url": "git+https://github.com/wanghaofu124/envguard-cli.git"
   },
   "homepage": "https://github.com/wanghaofu124/envguard-cli#readme",
   "bugs": {
