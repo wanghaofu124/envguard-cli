@@ -12,14 +12,28 @@ export function redactValue(key: string, value: string): string {
   return `${value.slice(0, 2)}***${value.slice(-2)}`;
 }
 
-function appendLengthHint(displayValue: string, length: number): string {
-  return `${displayValue} (len ${length})`;
+function appendCollisionHint(
+  displayValue: string,
+  oldLength: number,
+  newLength: number,
+  side: "old" | "new",
+): string {
+  if (side === "old") {
+    return `${displayValue} (len ${oldLength})`;
+  }
+
+  if (oldLength === newLength) {
+    return `${displayValue} (len ${newLength}, changed)`;
+  }
+
+  return `${displayValue} (len ${oldLength}->${newLength})`;
 }
 
 function withCollisionHint(
   key: string,
   value: string,
   otherValue: string,
+  side: "old" | "new",
   redact: boolean,
 ): string {
   const displayValue = redact ? redactValue(key, value) : value;
@@ -33,7 +47,9 @@ function withCollisionHint(
     return displayValue;
   }
 
-  return appendLengthHint(displayValue, value.length);
+  const oldLength = side === "old" ? value.length : otherValue.length;
+  const newLength = side === "old" ? otherValue.length : value.length;
+  return appendCollisionHint(displayValue, oldLength, newLength, side);
 }
 
 export function formatKeyValue(key: string, value: string, redact = true): string {
@@ -50,7 +66,7 @@ export function formatChangedKeyValue(
 ): string {
   const value = side === "old" ? oldValue : newValue;
   const otherValue = side === "old" ? newValue : oldValue;
-  const displayValue = withCollisionHint(key, value, otherValue, redact);
+  const displayValue = withCollisionHint(key, value, otherValue, side, redact);
   return `${key} = ${displayValue}`;
 }
 

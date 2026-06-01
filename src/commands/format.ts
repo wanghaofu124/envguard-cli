@@ -1,11 +1,12 @@
 import chalk from "chalk";
 import Table from "cli-table3";
+import { groupFindingsByKey } from "../core/findings.js";
 import {
   formatChangedPair,
   formatKeyValue,
   hasDiffChanges,
 } from "../core/redact.js";
-import type { DiffJsonOutput, SecretFinding, SecretSeverity } from "../types.js";
+import type { DiffJsonOutput, SecretFinding } from "../types.js";
 
 function formatSecretBadge(findings: SecretFinding[] | undefined): string {
   if (!findings || findings.length === 0) {
@@ -16,43 +17,10 @@ function formatSecretBadge(findings: SecretFinding[] | undefined): string {
   return hasError ? chalk.red(" [!secret]") : chalk.yellow(" [!warning]");
 }
 
-interface GroupedFinding {
-  key: string;
-  severity: SecretSeverity;
-  reasons: string[];
-  value: string;
-}
-
-function groupFindingsByKey(findings: SecretFinding[]): GroupedFinding[] {
-  const grouped = new Map<string, GroupedFinding>();
-
-  for (const finding of findings) {
-    const existing = grouped.get(finding.key);
-    if (!existing) {
-      grouped.set(finding.key, {
-        key: finding.key,
-        severity: finding.severity,
-        reasons: [finding.reason],
-        value: finding.value,
-      });
-      continue;
-    }
-
-    if (finding.severity === "error") {
-      existing.severity = "error";
-    }
-
-    if (!existing.reasons.includes(finding.reason)) {
-      existing.reasons.push(finding.reason);
-    }
-  }
-
-  return [...grouped.values()].sort((a, b) => a.key.localeCompare(b.key));
-}
-
 export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boolean; redact?: boolean } = {}) {
   const { showAll = false, redact = true } = options;
   const hasDiff = hasDiffChanges(report);
+  const groupedSecrets = groupFindingsByKey(report.secrets);
 
   console.log(chalk.bold("EnvGuard Diff"));
   console.log(`A: ${report.fileA}`);
@@ -107,11 +75,11 @@ export function printDiffReport(report: DiffJsonOutput, options: { showAll?: boo
     console.log(chalk.green("No differences found."));
   }
 
-  if (report.secrets.length > 0) {
-    console.log(chalk.yellow(`Secrets detected: ${report.secrets.length}`));
-    for (const finding of report.secrets) {
+  if (groupedSecrets.length > 0) {
+    console.log(chalk.yellow(`Secrets detected: ${groupedSecrets.length}`));
+    for (const finding of groupedSecrets) {
       const label = finding.severity === "error" ? chalk.red("ERROR") : chalk.yellow("WARN");
-      console.log(`  ${label} ${finding.key}: ${finding.reason}`);
+      console.log(`  ${label} ${finding.key}: ${finding.reasons.join("; ")}`);
     }
   } else if (hasDiff) {
     console.log(chalk.green("No secret patterns detected."));
@@ -137,12 +105,12 @@ export function printCheckReport(
     console.log("");
   }
 
-  if (report.secrets.length === 0) {
+  const grouped = groupFindingsByKey(report.secrets);
+  if (grouped.length === 0) {
     console.log(chalk.green("No secret patterns detected."));
     return;
   }
 
-  const grouped = groupFindingsByKey(report.secrets);
   const table = new Table({
     head: ["Severity", "Key", "Reason", "Value"],
   });

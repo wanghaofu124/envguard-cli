@@ -33,19 +33,19 @@ describe("formatChangedPair", () => {
     );
 
     expect(oldLine).toBe("API_URL = ht***om (len 23)");
-    expect(newLine).toBe("API_URL = ht***om (len 27)");
+    expect(newLine).toBe("API_URL = ht***om (len 23->27)");
   });
 
   it("adds length hints for sensitive keys when values differ", () => {
     const { oldLine, newLine } = formatChangedPair("API_KEY", "replace-me", "sk-dev-placeholder-key-1234567890", true);
 
     expect(oldLine).toBe("API_KEY = **** (len 10)");
-    expect(newLine).toBe("API_KEY = **** (len 33)");
+    expect(newLine).toBe("API_KEY = **** (len 10->33)");
   });
 
-  it("adds length hints for short values", () => {
+  it("marks equal-length collisions as changed on the new side", () => {
     expect(formatChangedKeyValue("SHORT", "ab", "xy", "old", true)).toBe("SHORT = **** (len 2)");
-    expect(formatChangedKeyValue("SHORT", "ab", "xy", "new", true)).toBe("SHORT = **** (len 2)");
+    expect(formatChangedKeyValue("SHORT", "ab", "xy", "new", true)).toBe("SHORT = **** (len 2, changed)");
   });
 
   it("does not add hints when redacted values already differ", () => {

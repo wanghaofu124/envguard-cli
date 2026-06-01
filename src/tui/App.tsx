@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
 import { formatChangedPair, formatKeyValue } from "../core/redact.js";
+import { groupFindingsByKey } from "../core/findings.js";
 import { buildDiffReport } from "../core/service.js";
 import type { DiffJsonOutput, DiffViewMode } from "../types.js";
 
@@ -99,6 +100,7 @@ export function App({ fileA, fileB }: AppProps) {
   const { exit } = useApp();
   const [mode, setMode] = useState<DiffViewMode>("diff");
   const report = useMemo(() => buildDiffReport(fileA, fileB), [fileA, fileB]);
+  const groupedSecrets = useMemo(() => groupFindingsByKey(report.secrets), [report.secrets]);
 
   useInput((input, key) => {
     if (input === "q" || (key.ctrl && input === "c")) {
@@ -134,17 +136,17 @@ export function App({ fileA, fileB }: AppProps) {
         B: {report.fileB}
       </Text>
       <Text dimColor>
-        View: {modeLabel} | differences: {countDiffItems(report)} | secrets: {report.secrets.length}
+        View: {modeLabel} | differences: {countDiffItems(report)} | secrets: {groupedSecrets.length}
       </Text>
 
       <Box marginTop={1} flexDirection="column">
         {mode === "secrets" ? (
-          report.secrets.length === 0 ? (
+          groupedSecrets.length === 0 ? (
             <Text color="green">No secret patterns detected.</Text>
           ) : (
-            report.secrets.map((finding) => (
-              <Text key={`${finding.key}-${finding.reason}`}>
-                [{finding.severity.toUpperCase()}] {finding.key}: {finding.reason}
+            groupedSecrets.map((finding) => (
+              <Text key={finding.key}>
+                [{finding.severity.toUpperCase()}] {finding.key}: {finding.reasons.join("; ")}
               </Text>
             ))
           )
