@@ -1,5 +1,9 @@
 # EnvGuard CLI
 
+[![CI](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/envguard-cli.svg)](https://www.npmjs.com/package/envguard-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Secure `.env` diff tool with redaction and secret detection.
 
 EnvGuard helps you compare environment files safely: differences are categorized, values are redacted by default, and common secret patterns are flagged before they leak into logs or pull requests.
@@ -14,20 +18,53 @@ EnvGuard helps you compare environment files safely: differences are categorized
 
 ## Quick Start
 
+Install and run (recommended):
+
+```bash
+npx envguard-cli diff .env.example .env
+npx envguard-cli check .env --strict
+```
+
+Or install globally:
+
+```bash
+npm install -g envguard-cli
+envguard diff .env.example .env
+envguard check .env
+```
+
+From source:
+
 ```bash
 git clone https://github.com/wanghaofu124/envguard-cli.git
 cd envguard-cli
 npm install
 npm run build
-```
-
-Run locally:
-
-```bash
 node bin/envguard.js diff fixtures/.env.example fixtures/.env.prod
-node bin/envguard.js check fixtures/.env.prod
-node bin/envguard.js
 ```
+
+## Demo
+
+```text
+$ envguard diff .env.example .env.dev
+
++ ADDED (1)
+  LOG_LEVEL = de***ug
+
+~ CHANGED (3)
+  - API_KEY = **** (len 10)
+  + API_KEY = **** (len 10->33) [!warning]
+  - API_URL = ht***om (len 23)
+  + API_URL = ht***om (len 23->27)
+  - DB_PASSWORD = **** (len 8)
+  + DB_PASSWORD = **** (len 8->16) [!warning]
+
+Secrets detected: 2
+  WARN API_KEY: Sensitive key name
+  WARN DB_PASSWORD: Sensitive key name
+```
+
+Full output: [docs/demo-output.txt](docs/demo-output.txt)
 
 ## Usage
 
@@ -92,6 +129,8 @@ npm run build
 npm run typecheck
 ```
 
+Note: `npm audit` may report moderate issues in devDependencies (vitest/vite). These do not affect the published CLI package.
+
 ## License
 
 MIT
@@ -99,6 +138,9 @@ MIT
 ---
 
 # EnvGuard CLI（中文）
+
+[![CI](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/wanghaofu124/envguard-cli/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/envguard-cli.svg)](https://www.npmjs.com/package/envguard-cli)
 
 ## 项目介绍
 
@@ -122,20 +164,28 @@ EnvGuard 通过 **差异分类 + 默认脱敏 + 密钥检测**，让 env 文件�
 ### 快速开始
 
 ```bash
+# 推荐：无需安装
+npx envguard-cli diff .env.example .env
+npx envguard-cli check .env --strict
+
+# 全局安装
+npm install -g envguard-cli
+envguard diff .env.example .env
+```
+
+从源码运行：
+
+```bash
 git clone https://github.com/wanghaofu124/envguard-cli.git
 cd envguard-cli
 npm install
 npm run build
-
-# 对比两个 env 文件
 node bin/envguard.js diff fixtures/.env.example fixtures/.env.dev
-
-# 扫描密钥
-node bin/envguard.js check fixtures/.env.prod
-
-# 交互模式
-node bin/envguard.js
 ```
+
+### Demo 示例
+
+见 [docs/demo-output.txt](docs/demo-output.txt)
 
 ### 常用命令
 

@@ -1,0 +1,20 @@
+$ envguard diff .env.example .env.dev
+
+EnvGuard Diff
+A: .env.example
+B: .env.dev
+
++ ADDED (1)
+  LOG_LEVEL = de***ug
+
+~ CHANGED (3)
+  - API_KEY = **** (len 10)
+  + API_KEY = **** (len 10->33) [!warning]
+  - API_URL = ht***om (len 23)
+  + API_URL = ht***om (len 23->27)
+  - DB_PASSWORD = **** (len 8)
+  + DB_PASSWORD = **** (len 8->16) [!warning]
+
+Secrets detected: 2
+  WARN API_KEY: Sensitive key name
+  WARN DB_PASSWORD: Sensitive key name
