@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from "commander";
 import { runCheckCommand } from "./commands/check.js";
 import { runDiffCommand } from "./commands/diff.js";
