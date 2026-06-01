@@ -4,10 +4,9 @@
   "description": "Secure .env file diff tool with redaction and secret detection",
   "type": "module",
   "bin": {
-    "envguard": "./bin/envguard.js"
+    "envguard": "./dist/index.js"
   },
   "files": [
-    "bin",
     "dist"
   ],
   "scripts": {
